@@ -116,11 +116,33 @@ def generator(samples, batch_size=32):
             images = []
             angles = []
             for batch_sample in batch_samples:
-                name = './IMG/'+batch_sample[0].split('/')[-1]
+                
+                correction = 0.2
+                
+                name = './IMG/'+batch_sample[0].split('/')[-1] 
                 center_image = cv2.imread(name)
+                name = './IMG/'+batch_sample[1].split('/')[-1] 
+                left_image = cv2.imread(name)
+                name = './IMG/'+batch_sample[2].split('/')[-1] 
+                right_image = cv2.imread(name)
+                
                 center_angle = float(batch_sample[3])
-                images.append(center_image)
-                angles.append(center_angle)
+                left_angle = center_angle + correction
+                right_angle = center_angle - correction
+                images.extend([center_image, left_image, right_image])
+                angles.extend([center_angle, left_angle, right_angle])
+                
+                #flipping
+                def flip(image, angle):
+                    image_flipped = np.fliplr(image)
+                    angle_flipped = -angle
+                    images.append(image_flipped)
+                    angles.append(angle_flipped)
+                flip(center_image, center_angle)
+                flip(left_image, left_angle)
+                flip(right_image, right_angle)
+                
+                    
 
             # trim image to only see section with road
             X_train = np.array(images)
@@ -131,38 +153,39 @@ def generator(samples, batch_size=32):
 train_generator = generator(train_samples, batch_size=32)
 validation_generator = generator(validation_samples, batch_size=32)
 
-ch, row, col = 3, 90, 320  # Trimmed image format
-
-
-
+ch, col, row = 3, 90, 320  # Trimmed image format
 
 model = Sequential()
 # Preprocess incoming data, centered around zero with small standard deviation 
 model.add(Cropping2D(cropping=((50,20), (0,0)), input_shape=(160,320,3)))
 model.add(Lambda(lambda x: x/127.5 - 1.,
-        input_shape=(ch, row, col),
-        output_shape=(ch, row, col)))
+        input_shape=(row, col, ch),
+        output_shape=(row, col, ch)))
 
-#model.add(Conv2D(32, (3, 3)))
-#model.add(MaxPooling2D((2, 2)))
-#model.add(Dropout(0.5))
-#model.add(Activation('relu'))
+model.add(Conv2D(64, (3, 3)))
+model.add(MaxPooling2D((2, 2)))
+model.add(Dropout(0.25))
+model.add(Activation('relu'))
+
+model.add(Conv2D(32, (3, 3)))
+model.add(MaxPooling2D((2, 2)))
+model.add(Dropout(0.25))
+model.add(Activation('relu'))
+
 model.add(Flatten())
-model.add(Dense(128 * 8))
+model.add(Dense(128 * 2))
 model.add(Activation('relu'))
 model.add(Dense(128))
 model.add(Activation('relu'))
 model.add(Dense(1))
 
-#model.add(... finish defining the rest of your model architecture here ...)
-
 model.compile(loss='mse', optimizer='adam')
 model.fit_generator(train_generator,
-                    samples_per_epoch=len(train_samples),
+                    samples_per_epoch=len(train_samples) * 3 * 2,
                     validation_data=validation_generator,
                     nb_val_samples=len(validation_samples),
                     nb_epoch=3)
 
-model.save("model.h5")
+model.save("model2.h5")
 
 
