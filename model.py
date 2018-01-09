@@ -91,16 +91,28 @@ from keras.layers.core import Dense, Activation, Flatten, Dropout, Lambda
 from keras.layers.convolutional import Conv2D
 from keras.layers.pooling import MaxPooling2D
 from sklearn.utils import shuffle
+import tensorflow as tf
+import keras.backend.tensorflow_backend as ktf
 
+datapath = './data/2/'
+#datapath = './'
+def get_session(gpu_fraction=1):
+    ''''''
+    gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=gpu_fraction,
+                                allow_growth=True)
+    return tf.Session(config=tf.ConfigProto(gpu_options=gpu_options))
+
+
+ktf.set_session(get_session())
 
 
 samples = []
-with open('./driving_log.csv') as csvfile:
+with open(datapath + 'driving_log.csv') as csvfile:
     reader = csv.reader(csvfile, )
     
     for line in reader:
         samples.append(line)
-    samples = samples[1:]
+    #samples = samples[1:]
 
 train_samples, validation_samples = train_test_split(samples, test_size=0.2)
 
@@ -119,11 +131,12 @@ def generator(samples, batch_size=32):
                 
                 correction = 0.2
                 
-                name = './IMG/'+batch_sample[0].split('/')[-1] 
+                name = datapath + 'IMG/'+batch_sample[0].split('\\')[-1]
+                #print (name)
                 center_image = cv2.imread(name)
-                name = './IMG/'+batch_sample[1].split('/')[-1] 
+                name = datapath + 'IMG/'+batch_sample[1].split('\\')[-1] 
                 left_image = cv2.imread(name)
-                name = './IMG/'+batch_sample[2].split('/')[-1] 
+                name = datapath + 'IMG/'+batch_sample[2].split('\\')[-1] 
                 right_image = cv2.imread(name)
                 
                 center_angle = float(batch_sample[3])
@@ -150,8 +163,8 @@ def generator(samples, batch_size=32):
             yield shuffle(X_train, y_train)
 
 # compile and train the model using the generator function
-train_generator = generator(train_samples, batch_size=32)
-validation_generator = generator(validation_samples, batch_size=32)
+train_generator = generator(train_samples, batch_size=8)
+validation_generator = generator(validation_samples, batch_size=8)
 
 ch, col, row = 3, 90, 320  # Trimmed image format
 
@@ -184,8 +197,8 @@ model.fit_generator(train_generator,
                     samples_per_epoch=len(train_samples) * 3 * 2,
                     validation_data=validation_generator,
                     nb_val_samples=len(validation_samples),
-                    nb_epoch=3)
+                    nb_epoch=7)
 
-model.save("model2.h5")
+model.save("model6.h5")
 
 
