@@ -94,7 +94,7 @@ from sklearn.utils import shuffle
 import tensorflow as tf
 import keras.backend.tensorflow_backend as ktf
 
-datapath = './data/2/'
+datapath = './data/1/'
 #datapath = './'
 def get_session(gpu_fraction=1):
     ''''''
@@ -129,7 +129,7 @@ def generator(samples, batch_size=32):
             angles = []
             for batch_sample in batch_samples:
                 
-                correction = 0.2
+                correction = 0.25
                 
                 name = datapath + 'IMG/'+batch_sample[0].split('\\')[-1]
                 #print (name)
@@ -175,7 +175,7 @@ model.add(Lambda(lambda x: x/127.5 - 1.,
         input_shape=(row, col, ch),
         output_shape=(row, col, ch)))
 
-model.add(Conv2D(64, (3, 3)))
+model.add(Conv2D(16, (3, 3)))
 model.add(MaxPooling2D((2, 2)))
 model.add(Dropout(0.25))
 model.add(Activation('relu'))
@@ -184,6 +184,13 @@ model.add(Conv2D(32, (3, 3)))
 model.add(MaxPooling2D((2, 2)))
 model.add(Dropout(0.25))
 model.add(Activation('relu'))
+
+
+model.add(Conv2D(32, (3, 3)))
+model.add(MaxPooling2D((2, 2)))
+model.add(Dropout(0.25))
+model.add(Activation('relu'))
+
 
 model.add(Flatten())
 model.add(Dense(128 * 2))
@@ -197,8 +204,8 @@ model.fit_generator(train_generator,
                     samples_per_epoch=len(train_samples) * 3 * 2,
                     validation_data=validation_generator,
                     nb_val_samples=len(validation_samples),
-                    nb_epoch=7)
+                    nb_epoch=2)
 
-model.save("model6.h5")
+model.save("model7.h5")
 
 
