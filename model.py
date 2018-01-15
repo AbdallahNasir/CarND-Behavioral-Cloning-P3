@@ -94,7 +94,7 @@ from sklearn.utils import shuffle
 import tensorflow as tf
 import keras.backend.tensorflow_backend as ktf
 
-datapath = './data/1/'
+datapath = './data/2/'
 #datapath = './'
 def get_session(gpu_fraction=1):
     ''''''
@@ -206,6 +206,6 @@ model.fit_generator(train_generator,
                     nb_val_samples=len(validation_samples),
                     nb_epoch=2)
 
-model.save("model7.h5")
+model.save("model8.h5")
 
 
