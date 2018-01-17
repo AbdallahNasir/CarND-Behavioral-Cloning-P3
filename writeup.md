@@ -12,20 +12,28 @@ Below is a sample of the data being used in the training.
 ## Data Preprocessing.
 Right and left images were used with a correction of 0.25, which was chosen based on expiremntal trials. Each image was flipped horizontally to remove bias towards left or right.
 
+## Building the model
+### LeNet
+Inspired by LeNet, I started develpment with two convnets layer model, with maxpooling and activation and dropouts after the convnets. Dropouts and maxpooling layers were used to reduce overfitting.
+
+The results were not good, at driving, as the model barely could drive half of the track. 
+
+### Final Solution
+I increased the convnets layers by one, making the netweork deeper, but not as deep as the NVidea netweork, as the problem was not that compicated.
 ## Model Layers
 The model consists of the following layers.
 
 ![alt text](/resources/model.png "Model Architecture")
 
-Initially, the image got cropped to remove the sky and the mountains and trees, to let the model focus on the actual road ahead.
+Initially, the image got cropped, from top, to remove sky and mountains, and from bottom to remove the hood. The following image is a sample output from cropping.
 
-The image got normalized.
+![alt text](/resources/center_2018_01_04_16_54_29_409_CROPPED.jpg "Cropped image")
 
-A total of three convolutional layers are used. The problem is not very simple to use LeNet, and is not that complicated to use a very deep neural network like NVidea, so a mid level solution was used.
+The image got normalized, centered around zero with a little deviation.
 
-After each convnet layer, a dropout layer was used to minimize overfitting.
+A total of three convnets were used, each followed by maxpooling and dropouts layer to reduce overfitting, and the activation used is relu.
 
-After convnets, a two hidden fully connected layers are used. Two is enough, as going deeper will increase the possibility of over fitting. 
+After convnets, a two hidden fully connected layers are used. Two is enough, as going deeper will increase the possibility of over fitting.
 
 ## Training the model
 The model was trained in two epochs only. This number came after several trials, of sometimes 10 epochs, and was noticed that the validation loss does not change usually after the second epoch. Adam optimizer was used, and the loss was computed using mean squared error.
